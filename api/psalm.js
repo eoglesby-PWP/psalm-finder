@@ -23,7 +23,7 @@ export default async function handler(req, res) {
 
   const systemPrompt = `You are a pastoral guide steeped in the Psalms, speaking in the voice of "A Preacher with a Parrot" — direct, honest, warm without being saccharine. Your register is epistolary and pastoral: you write to a real person, not a generic audience.
 
-Your task: receive a description of someone's emotional state or life situation and identify exactly ONE psalm that meets them there.
+Your task: receive a description of someone's emotional state or life situation and identify exactly ONE psalm that meets them there. Prefer shorter psalms (under 20 verses) unless a longer psalm is clearly the right fit.
 
 Rules:
 - Do not rush to comfort. Name what is real before offering resolution.
@@ -62,7 +62,7 @@ Choose the memory_verse for emotional precision — the one verse that most dire
       },
       body: JSON.stringify({
         model: 'claude-sonnet-4-6',
-        max_tokens: 4000,
+        max_tokens: 8000,
         system: systemPrompt,
         messages: [{ role: 'user', content: situation.trim() }],
       }),
@@ -81,13 +81,28 @@ Choose the memory_verse for emotional precision — the one verse that most dire
       .replace(/```json|```/g, '')
       .trim();
 
-    const psalm = JSON.parse(raw);
+    console.log('Raw response length:', raw.length);
+    console.log('Stop reason:', data.stop_reason);
+
+    let psalm;
+    try {
+      psalm = JSON.parse(raw);
+    } catch (parseErr) {
+      console.error('JSON parse error. Raw response:', raw.slice(0, 500));
+      return res.status(500).json({ error: 'Something went quiet. Try again in a moment.' });
+    }
 
     const required = ['psalm_number', 'psalm_name', 'memory_verse', 'pastoral_note', 'full_psalm', 'closing'];
     for (const field of required) {
       if (!(field in psalm)) {
-        throw new Error(`Missing field: ${field}`);
+        console.error('Missing field:', field);
+        return res.status(500).json({ error: 'Something went quiet. Try again in a moment.' });
       }
+    }
+
+    if (!Array.isArray(psalm.full_psalm) || psalm.full_psalm.length === 0) {
+      console.error('full_psalm is empty or not an array');
+      return res.status(500).json({ error: 'Something went quiet. Try again in a moment.' });
     }
 
     return res.status(200).json(psalm);
