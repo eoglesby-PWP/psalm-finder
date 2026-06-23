@@ -18,9 +18,8 @@
       --ink-muted:  #5C5047;
       --ink-faint:  #8C7B6E;
       --parchment:  #F5EFE4;
-      --parchment-dark: #EDE3D0;
-      --gold:       #7A5C1E;
       --gold-light: #C49A3C;
+      --gold:       #7A5C1E;
       --rule:       rgba(92,70,47,0.2);
       --max-width:  640px;
     }
@@ -125,14 +124,41 @@
     .psalm-result { animation: appear 0.5s ease; }
     @keyframes appear { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
 
-    .for-you { font-size: 0.75rem; color: var(--ink-faint); font-style: italic; margin-bottom: 0.3rem; }
-
-    .psalm-name {
+    .psalm-headline {
       font-family: 'IM Fell English', Georgia, serif;
       font-size: 1.7rem;
       font-weight: 400;
       color: var(--ink);
-      margin-bottom: 1rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .section-label {
+      font-family: Georgia, serif;
+      font-size: 0.6rem;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--ink-faint);
+      margin-bottom: 0.75rem;
+    }
+
+    .memory-verse-block {
+      margin-bottom: 1.75rem;
+      padding-left: 1.1rem;
+      border-left: 2px solid var(--gold-light);
+    }
+
+    .memory-verse-text {
+      font-size: 1.1rem;
+      line-height: 1.8;
+      color: var(--ink);
+      margin-bottom: 0.25rem;
+    }
+
+    .verse-ref {
+      font-family: Georgia, serif;
+      font-size: 0.65rem;
+      letter-spacing: 0.08em;
+      color: var(--ink-faint);
     }
 
     .pastoral-note {
@@ -143,44 +169,40 @@
       margin-bottom: 1.75rem;
     }
 
-    .verses-label {
-      font-family: Georgia, serif;
-      font-size: 0.6rem;
-      letter-spacing: 0.14em;
-      text-transform: uppercase;
-      color: var(--ink-faint);
-      margin-bottom: 1rem;
+    .full-psalm {
+      margin-bottom: 1.75rem;
     }
 
-    .verse-block {
-      margin-bottom: 1.1rem;
-      padding-left: 1.1rem;
-      border-left: 1.5px solid var(--gold-light);
+    .psalm-verse-row {
+      display: flex;
+      gap: 0.75rem;
+      margin-bottom: 0.6rem;
+      line-height: 1.75;
     }
 
-    .verse-text {
-      font-size: 1rem;
-      line-height: 1.8;
-      color: var(--ink);
-      margin-bottom: 0.2rem;
-    }
-
-    .verse-ref {
+    .psalm-verse-num {
       font-family: Georgia, serif;
       font-size: 0.65rem;
-      letter-spacing: 0.08em;
       color: var(--ink-faint);
+      min-width: 1.5rem;
+      padding-top: 0.35rem;
+      text-align: right;
+      flex-shrink: 0;
+    }
+
+    .psalm-verse-text {
+      font-size: 0.95rem;
+      color: var(--ink);
     }
 
     .pastoral-close {
-      margin-top: 1.75rem;
       font-size: 0.95rem;
       line-height: 1.8;
       color: var(--ink-muted);
+      margin-bottom: 1.75rem;
     }
 
     .feedback-bar {
-      margin-top: 2rem;
       display: flex;
       align-items: center;
       gap: 0.75rem;
@@ -211,7 +233,6 @@
 
     .fb-btn:hover { border-color: var(--ink-muted); color: var(--ink); }
     .fb-btn.hit { border-color: var(--gold); color: var(--gold); }
-    .fb-btn.miss { border-color: #8B3A3A; color: #8B3A3A; }
 
     .status-line {
       margin-top: 1.25rem;
@@ -221,8 +242,25 @@
       min-height: 1.25rem;
     }
 
-    .loading-wrap { display: flex; align-items: center; gap: 0.6rem; color: var(--ink-faint); font-style: italic; font-size: 0.9rem; }
-    .spinner { width: 14px; height: 14px; border: 1.5px solid var(--rule); border-top-color: var(--gold); border-radius: 50%; animation: spin 0.8s linear infinite; flex-shrink: 0; }
+    .loading-wrap {
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+      color: var(--ink-faint);
+      font-style: italic;
+      font-size: 0.9rem;
+    }
+
+    .spinner {
+      width: 14px;
+      height: 14px;
+      border: 1.5px solid var(--rule);
+      border-top-color: var(--gold);
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+      flex-shrink: 0;
+    }
+
     @keyframes spin { to { transform: rotate(360deg); } }
 
     .footer {
@@ -247,21 +285,23 @@
 </head>
 <body>
   <main class="page">
-    <p class="site-eyebrow">A Preacher with a Parrot</p>
-    <h1>Find Your Psalm</h1>
-    <p class="subtitle">Tell me what you're carrying. I'll find the psalm that meets you there.</p>
+    <div id="input-section">
+      <p class="site-eyebrow">A Preacher with a Parrot</p>
+      <h1>Find Your Psalm</h1>
+      <p class="subtitle">Tell me what you're carrying. I'll find the psalm that meets you there.</p>
 
-    <hr>
+      <hr>
 
-    <label class="field-label" for="situation">What are you feeling? What's happening?</label>
-    <textarea
-      id="situation"
-      placeholder="I can't stop grieving. I've been angry at God for months. I feel completely alone and I don't know if any of this is going to be okay…"
-      rows="5"
-      maxlength="2000"
-    ></textarea>
-    <br>
-    <button class="find-btn" id="find-btn" onclick="findPsalm(false)">Find my psalm</button>
+      <label class="field-label" for="situation">What are you feeling? What's happening?</label>
+      <textarea
+        id="situation"
+        placeholder="I can't stop grieving. I've been angry at God for months. I feel completely alone and I don't know if any of this is going to be okay…"
+        rows="5"
+        maxlength="2000"
+      ></textarea>
+      <br>
+      <button class="find-btn" id="find-btn" onclick="findPsalm(false)">Find my psalm</button>
+    </div>
 
     <div id="output-area"></div>
 
@@ -281,9 +321,12 @@
 
       const btn = document.getElementById('find-btn');
       const output = document.getElementById('output-area');
+      const inputSection = document.getElementById('input-section');
 
       btn.disabled = true;
-      output.innerHTML = '<div class="loading-wrap"><div class="spinner"></div><span>Searching the psalter…</span></div>';
+      inputSection.style.display = 'none';
+      output.innerHTML = '<div class="loading-wrap" style="padding: 3rem 0;"><div class="spinner"></div><span>Searching the psalter…</span></div>';
+      window.scrollTo({ top: 0, behavior: 'smooth' });
 
       try {
         const response = await fetch('/api/psalm', {
@@ -299,9 +342,10 @@
 
         const psalm = await response.json();
         renderResult(psalm);
+        window.scrollTo({ top: 0, behavior: 'smooth' });
       } catch (err) {
+        inputSection.style.display = 'block';
         output.innerHTML = `<p class="status-line">${err.message || 'Something went quiet. Try again in a moment.'}</p>`;
-      } finally {
         btn.disabled = false;
       }
     }
@@ -309,31 +353,49 @@
     function renderResult(psalm) {
       const output = document.getElementById('output-area');
 
-      const versesHtml = psalm.verses.map(v => `
-        <div class="verse-block">
-          <p class="verse-text">${escHtml(v.text)}</p>
-          <p class="verse-ref">${escHtml(v.reference)}</p>
+      const fullPsalmHtml = psalm.full_psalm.map(v => `
+        <div class="psalm-verse-row">
+          <span class="psalm-verse-num">${v.verse}</span>
+          <span class="psalm-verse-text">${escHtml(v.text)}</span>
         </div>
       `).join('');
 
       output.innerHTML = `
-        <hr>
         <div class="psalm-result" role="region" aria-label="Psalm recommendation">
-          <p class="for-you">For you, today —</p>
-          <h2 class="psalm-name">${escHtml(psalm.psalm_name)}</h2>
+          <p class="site-eyebrow">A Preacher with a Parrot</p>
+          <h2 class="psalm-headline">${escHtml(psalm.psalm_name)} is your psalm.</h2>
+
+          <hr>
+
+          <p class="section-label">Memory Verse</p>
+          <div class="memory-verse-block">
+            <p class="memory-verse-text">${escHtml(psalm.memory_verse.text)}</p>
+            <p class="verse-ref">${escHtml(psalm.memory_verse.reference)}</p>
+          </div>
+
           <p class="pastoral-note">${escHtml(psalm.pastoral_note)}</p>
 
-          <p class="verses-label">From the text</p>
-          ${versesHtml}
+          <hr>
+
+          <p class="section-label">${escHtml(psalm.psalm_name)}</p>
+          <div class="full-psalm">
+            ${fullPsalmHtml}
+          </div>
+
+          <hr>
 
           <p class="pastoral-close">${escHtml(psalm.closing)}</p>
 
           <div class="feedback-bar">
             <span class="feedback-label">Did this land?</span>
             <button class="fb-btn hit" onclick="handleHit(this)">Yes, this is it</button>
-            <button class="fb-btn miss" onclick="handleMiss()">Not quite — try again</button>
+            <button class="fb-btn" onclick="handleMiss()">Not quite — try again</button>
           </div>
           <p class="status-line" id="feedback-line"></p>
+
+          <div style="margin-top: 2rem;">
+            <button class="find-btn" onclick="startOver()">Start over</button>
+          </div>
         </div>
       `;
     }
@@ -341,14 +403,41 @@
     function handleHit(btn) {
       document.getElementById('feedback-line').textContent = 'Glad it found you. Come back whenever you need it.';
       btn.style.borderColor = '#7A5C1E';
+      btn.style.color = '#7A5C1E';
     }
 
     async function handleMiss() {
-      const btn = document.getElementById('find-btn');
       const output = document.getElementById('output-area');
-      btn.disabled = true;
-      output.innerHTML = '<div class="loading-wrap"><div class="spinner"></div><span>Looking again…</span></div>';
-      await findPsalm(true);
+      output.innerHTML = '<div class="loading-wrap" style="padding: 3rem 0;"><div class="spinner"></div><span>Looking again…</span></div>';
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+
+      const situation = document.getElementById('situation').value.trim();
+
+      try {
+        const response = await fetch('/api/psalm', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ situation, retry: true }),
+        });
+
+        if (!response.ok) throw new Error('Server error');
+        const psalm = await response.json();
+        renderResult(psalm);
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      } catch (err) {
+        output.innerHTML = `<p class="status-line">Something went quiet. Try again in a moment.</p>`;
+      }
+    }
+
+    function startOver() {
+      const output = document.getElementById('output-area');
+      const inputSection = document.getElementById('input-section');
+      const btn = document.getElementById('find-btn');
+      output.innerHTML = '';
+      inputSection.style.display = 'block';
+      btn.disabled = false;
+      document.getElementById('situation').value = '';
+      window.scrollTo({ top: 0, behavior: 'smooth' });
     }
 
     function escHtml(str) {
