@@ -1,0 +1,361 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Find Your Psalm — A Preacher with a Parrot</title>
+  <meta name="description" content="Tell me what you're carrying. I'll find the psalm that meets you there.">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Crimson+Text:ital,wght@0,400;0,600;1,400;1,600&family=IM+Fell+English:ital@0;1&display=swap" rel="stylesheet">
+
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --ink:        #1C1814;
+      --ink-muted:  #5C5047;
+      --ink-faint:  #8C7B6E;
+      --parchment:  #F5EFE4;
+      --parchment-dark: #EDE3D0;
+      --gold:       #7A5C1E;
+      --gold-light: #C49A3C;
+      --rule:       rgba(92,70,47,0.2);
+      --max-width:  640px;
+    }
+
+    html { font-size: 18px; }
+
+    body {
+      background: var(--parchment);
+      color: var(--ink);
+      font-family: 'Crimson Text', Georgia, 'Times New Roman', serif;
+      min-height: 100vh;
+      padding: 0 1rem;
+    }
+
+    .page {
+      max-width: var(--max-width);
+      margin: 0 auto;
+      padding: 3rem 0 5rem;
+    }
+
+    .site-eyebrow {
+      font-family: Georgia, serif;
+      font-size: 0.65rem;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--gold);
+      margin-bottom: 0.75rem;
+    }
+
+    h1 {
+      font-family: 'IM Fell English', Georgia, serif;
+      font-size: 2.4rem;
+      font-weight: 400;
+      line-height: 1.15;
+      color: var(--ink);
+      margin-bottom: 0.5rem;
+    }
+
+    .subtitle {
+      font-size: 1rem;
+      color: var(--ink-muted);
+      font-style: italic;
+      line-height: 1.6;
+      margin-bottom: 2rem;
+    }
+
+    hr {
+      border: none;
+      border-top: 0.5px solid var(--rule);
+      margin: 1.75rem 0;
+    }
+
+    .field-label {
+      font-family: Georgia, serif;
+      font-size: 0.65rem;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--ink-faint);
+      margin-bottom: 0.5rem;
+      display: block;
+    }
+
+    textarea {
+      width: 100%;
+      min-height: 110px;
+      font-family: 'Crimson Text', Georgia, serif;
+      font-size: 1rem;
+      line-height: 1.65;
+      color: var(--ink);
+      background: rgba(255,255,255,0.55);
+      border: 0.5px solid var(--rule);
+      border-radius: 4px;
+      padding: 0.8rem 1rem;
+      resize: vertical;
+      transition: border-color 0.15s;
+    }
+
+    textarea::placeholder { color: var(--ink-faint); font-style: italic; }
+    textarea:focus { outline: none; border-color: var(--gold-light); background: rgba(255,255,255,0.75); }
+
+    .find-btn {
+      margin-top: 1rem;
+      font-family: Georgia, serif;
+      font-size: 0.75rem;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      padding: 0.65rem 1.5rem;
+      background: var(--ink);
+      color: var(--parchment);
+      border: none;
+      border-radius: 3px;
+      cursor: pointer;
+      transition: background 0.15s, opacity 0.15s;
+    }
+
+    .find-btn:hover { background: #2E2620; }
+    .find-btn:active { opacity: 0.85; }
+    .find-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+
+    #output-area { margin-top: 2.5rem; }
+
+    .psalm-result { animation: appear 0.5s ease; }
+    @keyframes appear { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+
+    .for-you { font-size: 0.75rem; color: var(--ink-faint); font-style: italic; margin-bottom: 0.3rem; }
+
+    .psalm-name {
+      font-family: 'IM Fell English', Georgia, serif;
+      font-size: 1.7rem;
+      font-weight: 400;
+      color: var(--ink);
+      margin-bottom: 1rem;
+    }
+
+    .pastoral-note {
+      font-size: 0.95rem;
+      line-height: 1.8;
+      color: var(--ink-muted);
+      font-style: italic;
+      margin-bottom: 1.75rem;
+    }
+
+    .verses-label {
+      font-family: Georgia, serif;
+      font-size: 0.6rem;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--ink-faint);
+      margin-bottom: 1rem;
+    }
+
+    .verse-block {
+      margin-bottom: 1.1rem;
+      padding-left: 1.1rem;
+      border-left: 1.5px solid var(--gold-light);
+    }
+
+    .verse-text {
+      font-size: 1rem;
+      line-height: 1.8;
+      color: var(--ink);
+      margin-bottom: 0.2rem;
+    }
+
+    .verse-ref {
+      font-family: Georgia, serif;
+      font-size: 0.65rem;
+      letter-spacing: 0.08em;
+      color: var(--ink-faint);
+    }
+
+    .pastoral-close {
+      margin-top: 1.75rem;
+      font-size: 0.95rem;
+      line-height: 1.8;
+      color: var(--ink-muted);
+    }
+
+    .feedback-bar {
+      margin-top: 2rem;
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      flex-wrap: wrap;
+    }
+
+    .feedback-label {
+      font-family: Georgia, serif;
+      font-size: 0.65rem;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--ink-faint);
+    }
+
+    .fb-btn {
+      font-family: Georgia, serif;
+      font-size: 0.7rem;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      padding: 0.4rem 1rem;
+      background: transparent;
+      border: 0.5px solid var(--rule);
+      border-radius: 3px;
+      cursor: pointer;
+      color: var(--ink-muted);
+      transition: border-color 0.15s, color 0.15s;
+    }
+
+    .fb-btn:hover { border-color: var(--ink-muted); color: var(--ink); }
+    .fb-btn.hit { border-color: var(--gold); color: var(--gold); }
+    .fb-btn.miss { border-color: #8B3A3A; color: #8B3A3A; }
+
+    .status-line {
+      margin-top: 1.25rem;
+      font-size: 0.8rem;
+      color: var(--ink-faint);
+      font-style: italic;
+      min-height: 1.25rem;
+    }
+
+    .loading-wrap { display: flex; align-items: center; gap: 0.6rem; color: var(--ink-faint); font-style: italic; font-size: 0.9rem; }
+    .spinner { width: 14px; height: 14px; border: 1.5px solid var(--rule); border-top-color: var(--gold); border-radius: 50%; animation: spin 0.8s linear infinite; flex-shrink: 0; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    .footer {
+      margin-top: 4rem;
+      padding-top: 1.5rem;
+      border-top: 0.5px solid var(--rule);
+      font-family: Georgia, serif;
+      font-size: 0.65rem;
+      letter-spacing: 0.08em;
+      color: var(--ink-faint);
+      text-align: center;
+    }
+
+    .footer a { color: var(--gold); text-decoration: none; }
+    .footer a:hover { text-decoration: underline; }
+
+    @media (max-width: 480px) {
+      h1 { font-size: 1.9rem; }
+      .page { padding: 2rem 0 4rem; }
+    }
+  </style>
+</head>
+<body>
+  <main class="page">
+    <p class="site-eyebrow">A Preacher with a Parrot</p>
+    <h1>Find Your Psalm</h1>
+    <p class="subtitle">Tell me what you're carrying. I'll find the psalm that meets you there.</p>
+
+    <hr>
+
+    <label class="field-label" for="situation">What are you feeling? What's happening?</label>
+    <textarea
+      id="situation"
+      placeholder="I can't stop grieving. I've been angry at God for months. I feel completely alone and I don't know if any of this is going to be okay…"
+      rows="5"
+      maxlength="2000"
+    ></textarea>
+    <br>
+    <button class="find-btn" id="find-btn" onclick="findPsalm(false)">Find my psalm</button>
+
+    <div id="output-area"></div>
+
+    <footer class="footer">
+      <a href="https://www.workers2work.com" target="_blank" rel="noopener">workers2work.com</a>
+      &nbsp;·&nbsp;
+      <a href="https://www.youtube.com/@apreacherwithaparrot" target="_blank" rel="noopener">YouTube</a>
+      &nbsp;·&nbsp;
+      <a href="https://substack.com/@apreacherwithaparrot" target="_blank" rel="noopener">Substack</a>
+    </footer>
+  </main>
+
+  <script>
+    async function findPsalm(retry) {
+      const situation = document.getElementById('situation').value.trim();
+      if (!situation) return;
+
+      const btn = document.getElementById('find-btn');
+      const output = document.getElementById('output-area');
+
+      btn.disabled = true;
+      output.innerHTML = '<div class="loading-wrap"><div class="spinner"></div><span>Searching the psalter…</span></div>';
+
+      try {
+        const response = await fetch('/api/psalm', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ situation, retry: !!retry }),
+        });
+
+        if (!response.ok) {
+          const err = await response.json().catch(() => ({}));
+          throw new Error(err.error || 'Server error');
+        }
+
+        const psalm = await response.json();
+        renderResult(psalm);
+      } catch (err) {
+        output.innerHTML = `<p class="status-line">${err.message || 'Something went quiet. Try again in a moment.'}</p>`;
+      } finally {
+        btn.disabled = false;
+      }
+    }
+
+    function renderResult(psalm) {
+      const output = document.getElementById('output-area');
+
+      const versesHtml = psalm.verses.map(v => `
+        <div class="verse-block">
+          <p class="verse-text">${escHtml(v.text)}</p>
+          <p class="verse-ref">${escHtml(v.reference)}</p>
+        </div>
+      `).join('');
+
+      output.innerHTML = `
+        <hr>
+        <div class="psalm-result" role="region" aria-label="Psalm recommendation">
+          <p class="for-you">For you, today —</p>
+          <h2 class="psalm-name">${escHtml(psalm.psalm_name)}</h2>
+          <p class="pastoral-note">${escHtml(psalm.pastoral_note)}</p>
+
+          <p class="verses-label">From the text</p>
+          ${versesHtml}
+
+          <p class="pastoral-close">${escHtml(psalm.closing)}</p>
+
+          <div class="feedback-bar">
+            <span class="feedback-label">Did this land?</span>
+            <button class="fb-btn hit" onclick="handleHit(this)">Yes, this is it</button>
+            <button class="fb-btn miss" onclick="handleMiss()">Not quite — try again</button>
+          </div>
+          <p class="status-line" id="feedback-line"></p>
+        </div>
+      `;
+    }
+
+    function handleHit(btn) {
+      document.getElementById('feedback-line').textContent = 'Glad it found you. Come back whenever you need it.';
+      btn.style.borderColor = '#7A5C1E';
+    }
+
+    async function handleMiss() {
+      const btn = document.getElementById('find-btn');
+      const output = document.getElementById('output-area');
+      btn.disabled = true;
+      output.innerHTML = '<div class="loading-wrap"><div class="spinner"></div><span>Looking again…</span></div>';
+      await findPsalm(true);
+    }
+
+    function escHtml(str) {
+      const d = document.createElement('div');
+      d.textContent = str;
+      return d.innerHTML;
+    }
+  </script>
+</body>
+</html>
