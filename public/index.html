@@ -325,8 +325,17 @@
 
       btn.disabled = true;
       inputSection.style.display = 'none';
-      output.innerHTML = '<div class="loading-wrap" style="padding: 3rem 0;"><div class="spinner"></div><span>Searching the psalter…</span></div>';
+      output.innerHTML = '<div class="loading-wrap" style="padding: 3rem 0;"><div class="spinner"></div><span id="loading-text">Reading Psalm 1</span></div>';
       window.scrollTo({ top: 0, behavior: 'smooth' });
+
+      // Psalm counter: 1→150 over ~9 seconds
+      let psalmCount = 1;
+      const counter = setInterval(() => {
+        psalmCount++;
+        const el = document.getElementById('loading-text');
+        if (el) el.textContent = 'Reading Psalm ' + psalmCount;
+        if (psalmCount >= 150) clearInterval(counter);
+      }, 60);
 
       try {
         const response = await fetch('/api/psalm', {
@@ -341,9 +350,11 @@
         }
 
         const psalm = await response.json();
+        clearInterval(counter);
         renderResult(psalm);
         window.scrollTo({ top: 0, behavior: 'smooth' });
       } catch (err) {
+        clearInterval(counter);
         inputSection.style.display = 'block';
         output.innerHTML = `<p class="status-line">${err.message || 'Something went quiet. Try again in a moment.'}</p>`;
         btn.disabled = false;
@@ -408,8 +419,16 @@
 
     async function handleMiss() {
       const output = document.getElementById('output-area');
-      output.innerHTML = '<div class="loading-wrap" style="padding: 3rem 0;"><div class="spinner"></div><span>Looking again…</span></div>';
+      output.innerHTML = '<div class="loading-wrap" style="padding: 3rem 0;"><div class="spinner"></div><span id="loading-text">Reading Psalm 1</span></div>';
       window.scrollTo({ top: 0, behavior: 'smooth' });
+
+      let psalmCount = 1;
+      const missCounter = setInterval(() => {
+        psalmCount++;
+        const el = document.getElementById('loading-text');
+        if (el) el.textContent = 'Reading Psalm ' + psalmCount;
+        if (psalmCount >= 150) clearInterval(missCounter);
+      }, 60);
 
       const situation = document.getElementById('situation').value.trim();
 
@@ -421,6 +440,7 @@
         });
 
         if (!response.ok) throw new Error('Server error');
+        clearInterval(missCounter);
         const psalm = await response.json();
         renderResult(psalm);
         window.scrollTo({ top: 0, behavior: 'smooth' });
