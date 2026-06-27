@@ -334,8 +334,12 @@
       const counter = setInterval(() => {
         psalmCount++;
         const el = document.getElementById('loading-text');
-        if (el) el.textContent = 'Reading Psalm ' + psalmCount;
-        if (psalmCount >= 150) clearInterval(counter);
+        if (psalmCount >= 150) {
+          if (el) el.textContent = 'Deciding which is perfect for you…';
+          clearInterval(counter);
+        } else {
+          if (el) el.textContent = 'Reading Psalm ' + psalmCount;
+        }
       }, 60);
 
       try {
@@ -427,8 +431,12 @@
       const missCounter = setInterval(() => {
         psalmCount++;
         const el = document.getElementById('loading-text');
-        if (el) el.textContent = 'Reading Psalm ' + psalmCount;
-        if (psalmCount >= 150) clearInterval(missCounter);
+        if (psalmCount >= 150) {
+          if (el) el.textContent = 'Deciding which is perfect for you…';
+          clearInterval(missCounter);
+        } else {
+          if (el) el.textContent = 'Reading Psalm ' + psalmCount;
+        }
       }, 60);
 
       const situation = document.getElementById('situation').value.trim();
