@@ -278,6 +278,21 @@
     .footer a { color: var(--gold); text-decoration: none; }
     .footer a:hover { text-decoration: underline; }
 
+    .share-btn {
+      font-family: Georgia, serif;
+      font-size: 0.7rem;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      padding: 0.4rem 1rem;
+      background: transparent;
+      border: 0.5px solid var(--gold);
+      border-radius: 3px;
+      cursor: pointer;
+      color: var(--gold);
+      transition: border-color 0.15s, color 0.15s, background 0.15s;
+    }
+    .share-btn:hover { background: rgba(122,92,30,0.08); }
+
     @media (max-width: 480px) {
       h1 { font-size: 1.9rem; }
       .page { padding: 2rem 0 4rem; }
@@ -316,6 +331,8 @@
   </main>
 
   <script>
+    let lastPsalmNumber = null;
+
     async function findPsalm(retry) {
       const situation = document.getElementById('situation').value.trim();
       if (!situation) return;
@@ -367,6 +384,7 @@
     }
 
     function renderResult(psalm) {
+      lastPsalmNumber = psalm.psalm_number;
       const output = document.getElementById('output-area');
 
       const fullPsalmHtml = psalm.full_psalm.map(v => `
@@ -406,6 +424,7 @@
             <span class="feedback-label">Did this land?</span>
             <button class="fb-btn hit" onclick="handleHit(this)">Yes, this is it</button>
             <button class="fb-btn" onclick="handleMiss()">Not quite — try again</button>
+            <button class="share-btn" id="share-btn" onclick="shareResult()">Share</button>
           </div>
           <p class="status-line" id="feedback-line"></p>
 
@@ -445,7 +464,7 @@
         const response = await fetch('/api/psalm', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ situation, retry: true }),
+          body: JSON.stringify({ situation, retry: true, previousPsalm: lastPsalmNumber }),
         });
 
         if (!response.ok) throw new Error('Server error');
@@ -467,6 +486,24 @@
       btn.disabled = false;
       document.getElementById('situation').value = '';
       window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    function shareResult() {
+      const url = 'https://psalm.apreacherwithaparrot.com';
+      const psalmName = lastPsalmNumber ? 'Psalm ' + lastPsalmNumber : 'A psalm';
+      const text = psalmName + ' is my psalm. Find yours: ' + url;
+      if (navigator.share) {
+        navigator.share({ title: 'Find Your Psalm', text: text, url: url })
+          .catch(() => {});
+      } else {
+        navigator.clipboard.writeText(text).then(() => {
+          const line = document.getElementById('feedback-line');
+          if (line) {
+            line.textContent = 'Copied to clipboard.';
+            setTimeout(() => { if (line.textContent === 'Copied to clipboard.') line.textContent = ''; }, 3000);
+          }
+        }).catch(() => {});
+      }
     }
 
     function escHtml(str) {

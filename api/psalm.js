@@ -11,7 +11,7 @@ export default async function handler(req, res) {
     return res.status(405).json({ error: 'Method not allowed' });
   }
 
-  const { situation, retry } = req.body;
+  const { situation, retry, previousPsalm } = req.body;
 
   if (!situation || typeof situation !== 'string' || situation.trim().length === 0) {
     return res.status(400).json({ error: 'situation is required' });
@@ -51,7 +51,7 @@ Respond ONLY with valid JSON. No markdown. No preamble. No trailing text. Exactl
 }
 
 The full_psalm array must contain EVERY verse of the psalm, in order, in KJV.
-Choose the memory_verse for emotional precision — the one verse that most directly meets this person's situation.${retry ? '\n\nIMPORTANT: The person felt the previous psalm did not fit. Recommend a DIFFERENT psalm entirely — one that approaches their situation from a different angle.' : ''}`;
+Choose the memory_verse for emotional precision — the one verse that most directly meets this person's situation.${retry ? `\n\nCRITICAL: The person indicated the previous psalm did not fit their situation. You MUST choose a completely different psalm.${previousPsalm ? ` Do NOT return Psalm ${previousPsalm} — that was already tried.` : ''} Approach their situation from an entirely different emotional or theological angle.` : ''}`;
 
   try {
     const anthropicResponse = await fetch('https://api.anthropic.com/v1/messages', {
