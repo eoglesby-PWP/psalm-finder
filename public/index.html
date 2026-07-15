@@ -506,17 +506,27 @@
     function shareResult() {
       const url = 'https://psalm.apreacherwithaparrot.com';
       const text = buildShareText();
-      // Always copy to clipboard first as fallback
-      navigator.clipboard.writeText(text).catch(() => {});
-      if (navigator.share) {
+      const line = document.getElementById('feedback-line');
+
+      // On mobile use native share sheet; on desktop copy to clipboard
+      const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+      if (isMobile && navigator.share) {
         navigator.share({ title: 'Find Your Psalm', text: text, url: url })
-          .catch(() => {});
+          .catch(() => {
+            // Fallback to clipboard if share fails
+            navigator.clipboard.writeText(text).then(() => {
+              if (line) line.textContent = 'Copied to clipboard.';
+            }).catch(() => {});
+          });
       } else {
-        const line = document.getElementById('feedback-line');
-        if (line) {
-          line.textContent = 'Copied to clipboard.';
-          setTimeout(() => { if (line.textContent === 'Copied to clipboard.') line.textContent = ''; }, 3000);
-        }
+        navigator.clipboard.writeText(text).then(() => {
+          if (line) {
+            line.textContent = 'Copied to clipboard — paste it anywhere to share.';
+            setTimeout(() => { if (line) line.textContent = ''; }, 4000);
+          }
+        }).catch(() => {
+          if (line) line.textContent = 'Could not copy. Try selecting and copying the text manually.';
+        });
       }
     }
 
