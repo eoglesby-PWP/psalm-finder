@@ -278,21 +278,6 @@
     .footer a { color: var(--gold); text-decoration: none; }
     .footer a:hover { text-decoration: underline; }
 
-    .share-btn {
-      font-family: Georgia, serif;
-      font-size: 0.7rem;
-      letter-spacing: 0.08em;
-      text-transform: uppercase;
-      padding: 0.4rem 1rem;
-      background: transparent;
-      border: 0.5px solid var(--gold);
-      border-radius: 3px;
-      cursor: pointer;
-      color: var(--gold);
-      transition: border-color 0.15s, color 0.15s, background 0.15s;
-    }
-    .share-btn:hover { background: rgba(122,92,30,0.08); }
-
     @media (max-width: 480px) {
       h1 { font-size: 1.9rem; }
       .page { padding: 2rem 0 4rem; }
@@ -332,6 +317,8 @@
 
   <script>
     let lastPsalmNumber = null;
+    let lastPsalmData = null;
+    let lastSituation = '';
 
     async function findPsalm(retry) {
       const situation = document.getElementById('situation').value.trim();
@@ -341,6 +328,7 @@
       const output = document.getElementById('output-area');
       const inputSection = document.getElementById('input-section');
 
+      lastSituation = situation;
       btn.disabled = true;
       inputSection.style.display = 'none';
       output.innerHTML = '<div class="loading-wrap" style="padding: 3rem 0;"><div class="spinner"></div><span id="loading-text">Reading Psalm 1</span></div>';
@@ -385,6 +373,7 @@
 
     function renderResult(psalm) {
       lastPsalmNumber = psalm.psalm_number;
+      lastPsalmData = psalm;
       const output = document.getElementById('output-area');
 
       const fullPsalmHtml = psalm.full_psalm.map(v => `
@@ -424,7 +413,7 @@
             <span class="feedback-label">Did this land?</span>
             <button class="fb-btn hit" onclick="handleHit(this)">Yes, this is it</button>
             <button class="fb-btn" onclick="handleMiss()">Not quite — try again</button>
-            <button class="share-btn" id="share-btn" onclick="shareResult()">Share</button>
+            <button class="fb-btn" onclick="shareResult()" style="border-color: var(--gold); color: var(--gold);">Share</button>
           </div>
           <p class="status-line" id="feedback-line"></p>
 
@@ -488,21 +477,46 @@
       window.scrollTo({ top: 0, behavior: 'smooth' });
     }
 
+    function buildShareText() {
+      if (!lastPsalmData) return '';
+      const p = lastPsalmData;
+      const verseLines = p.full_psalm.map(v => v.verse + '. ' + v.text).join('\n');
+      return [
+        'This is what I shared with the psalm finder:',
+        lastSituation,
+        '',
+        'This is what it returned:',
+        p.psalm_name + ' is your psalm.',
+        '',
+        'Memory Verse',
+        p.memory_verse.text,
+        p.memory_verse.reference,
+        '',
+        p.pastoral_note,
+        '',
+        p.psalm_name,
+        verseLines,
+        '',
+        p.closing,
+        '',
+        'Find your psalm: psalm.apreacherwithaparrot.com'
+      ].join('\n');
+    }
+
     function shareResult() {
       const url = 'https://psalm.apreacherwithaparrot.com';
-      const psalmName = lastPsalmNumber ? 'Psalm ' + lastPsalmNumber : 'A psalm';
-      const text = psalmName + ' is my psalm. Find yours: ' + url;
+      const text = buildShareText();
+      // Always copy to clipboard first as fallback
+      navigator.clipboard.writeText(text).catch(() => {});
       if (navigator.share) {
         navigator.share({ title: 'Find Your Psalm', text: text, url: url })
           .catch(() => {});
       } else {
-        navigator.clipboard.writeText(text).then(() => {
-          const line = document.getElementById('feedback-line');
-          if (line) {
-            line.textContent = 'Copied to clipboard.';
-            setTimeout(() => { if (line.textContent === 'Copied to clipboard.') line.textContent = ''; }, 3000);
-          }
-        }).catch(() => {});
+        const line = document.getElementById('feedback-line');
+        if (line) {
+          line.textContent = 'Copied to clipboard.';
+          setTimeout(() => { if (line.textContent === 'Copied to clipboard.') line.textContent = ''; }, 3000);
+        }
       }
     }
 
